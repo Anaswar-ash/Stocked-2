@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Chart from './Chart';
+import { connect, disconnect } from '../websocket';
 
 const DashboardWrapper = styled.div`
   display: flex;
@@ -40,6 +41,18 @@ const ChartArea = styled.div`
 `;
 
 const Dashboard: React.FC = () => {
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    connect((newData) => {
+      setData((prevData) => [...prevData, newData]);
+    });
+
+    return () => {
+      disconnect();
+    };
+  }, []);
+
   return (
     <DashboardWrapper>
       <Sidebar>
@@ -56,7 +69,7 @@ const Dashboard: React.FC = () => {
           <Title>Dashboard</Title>
         </Header>
         <ChartArea>
-          <Chart />
+          <Chart data={data} />
         </ChartArea>
       </MainContent>
     </DashboardWrapper>
