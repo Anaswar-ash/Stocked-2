@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import Chart from './Chart';
 
 const DashboardWrapper = styled.div`
   display: flex;
@@ -55,7 +56,7 @@ const Dashboard: React.FC = () => {
           <Title>Dashboard</Title>
         </Header>
         <ChartArea>
-          {/* Chart will go here */}
+          <Chart />
         </ChartArea>
       </MainContent>
     </DashboardWrapper>
