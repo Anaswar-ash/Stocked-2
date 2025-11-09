@@ -43,7 +43,7 @@ class WebSocketManager:
     async def run(self):
         loop = asyncio.get_running_loop()
         loop.create_task(self.producer())
-        async with websockets.serve(self.handler, "localhost", 8765):
+        async with websockets.serve(self.handler, "0.0.0.0", 8765):
             await asyncio.Future()  # run forever
 
 manager = WebSocketManager()

@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://localhost:8765');
+const socket = new WebSocket('ws://localhost:8000/ws/aggregate');
 
 export const connect = (cb: (data: any) => void) => {
   socket.onopen = () => {
