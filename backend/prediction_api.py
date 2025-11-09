@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from ..services.data_service import get_historical_data
-from ..services.prediction_service import train_and_predict_with_lstm, train_and_predict_with_linear_regression, train_and_predict_with_arima
+from services.data_service import get_historical_data
+from services.prediction_service import train_and_predict_with_lstm, train_and_predict_with_linear_regression, train_and_predict_with_arima
 
 router = APIRouter()
 

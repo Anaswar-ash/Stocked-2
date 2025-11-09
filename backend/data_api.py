@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from ..services.data_service import get_historical_data
+from services.data_service import get_historical_data
 
 router = APIRouter()
 

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-from .api import data_api, prediction_api
-from .websocket.websocket_manager import manager
+import data_api
+import prediction_api
+from websocket.websocket_manager import manager
 import threading
 import asyncio
 
