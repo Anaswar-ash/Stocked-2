@@ -1,58 +1,79 @@
-# Real-Time Financial Dashboard
+# FX-Terminal
 
-This web application provides real-time currency and stock exchange data from the UK, US, Hong Kong, and India. The application also features a prediction page that uses advanced machine learning models to forecast future trends.
+FX-Terminal is a Bloomberg-style, minimalist, terminal-font web application for real-time currency and stock exchange data. It provides a platform for viewing real-time data from the UK, US, Hong Kong, and India, and also includes a prediction page which uses LSTM, ARIMA, and other models to predict stock and currency prices.
 
-## Key Features
+## What You See
 
-*   **Real-Time Data:** The application will display real-time currency and stock data from the specified regions.
-*   **Prediction Engine:** A dedicated page will allow you to predict future stock and currency prices using models like LSTM and ARIMA.
-*   **Bloomberg Terminal UI:** The user interface will be inspired by the iconic Bloomberg terminal, with a minimalist blue and black design and a monospaced font for a professional, data-driven look.
+```
+┌──────────────────────────────────────────────────────────────┐
+│  FX-TERMINAL  v1.0.0                    [🔵]  [⚙]  [👤]  │
+├──────────────────────────────────────────────────────────────┤
+│  > GBP/USD  1.3045  -0.72 %  │  > USD/INR  88.65  -0.02 %  │
+│  > USD/HKD  7.7740  +0.03 %  │  > BTC/USD  96 430  +2.11 % │
+│                                                              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   FTSE-100   │  │   S&P 500    │  │ NIFTY 50     │      │
+│  │   8 294.2 ▲  │  │ 5 987.3 ▼    │  │ 24 180 ▲     │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                              │
+│  > predict GBPUSD 24h                                        │
+│  LSTM → 1.3012 ±0.0014  (conf 94 %)                        │
+│  ARIMA→ 1.3008 ±0.0021  (conf 91 %)                        │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## High-Level Architecture
+
+```
+                       ┌---------------┐
+Browser <--WS-->  Nginx  (TLS, gzip, /api, /ws)  
+                       └-----┬---------┘
+                             │
+         ┌-------------------┴-------------------┐
+         │           Kubernetes Pod               │
+         │  ┌-------------┐  ┌-------------┐    │
+         │  │  Next.js    │  │  FastAPI    │    │
+         │  │  (React)    │  │  (Python)   │    │
+         │  │  3000       │  │  8000       │    │
+         │  └------┬------┘  └------┬------┘    │
+         │         │ WS/REST         │ REST      │
+         │  ┌------┴------┐  ┌------┴------┐    │
+         │  │  Redis      │  │  PostgreSQL │    │
+         │  │  (pub/sub)  │  │  (OHLCV)    │    │
+         │  └-------------┘  └-------------┘    │
+         └---------------------------------------┘
+                             │
+              ┌--------------┴--------------┐
+              │  Background workers (Celery) │
+              │  - fetcher.py                │
+              │  - predictor.py              │
+              └------------------------------┘
+```
 
 ## Technology Stack
 
-*   **Frontend:** React, TypeScript, Recharts
-*   **Backend:** Python, FastAPI, yfinance, TensorFlow/Keras, statsmodels
-*   **Real-Time Communication:** WebSockets
+*   **Frontend:** Next.js (React)
+*   **Backend:** FastAPI (Python)
+*   **Real-Time:** Redis (pub/sub), WebSockets
+*   **Database:** PostgreSQL
+*   **Async Tasks:** Celery
+*   **Proxy:** Nginx
+*   **Containerization:** Docker
+*   **Orchestration:** Kubernetes
+*   **Deployment:** Terraform
 
-## Getting Started
+## Clone & Run (30 s)
 
-### Prerequisites
+```bash
+git clone https://github.com/Anaswar-ash/Stocked-2.git
+cd Stocked-2
+cp .env.example .env   # add your Twelve-Data key
+docker-compose up
+```
 
-*   Python 3.9+
-*   Node.js 14+
+Open `http://localhost:3000` to see the application.
 
-### Installation
+## Compliance Disclaimer
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd finance-dashboard
-    ```
-
-2.  **Backend Setup:**
-    ```bash
-    cd backend
-    python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-    pip install -r requirements.txt
-    ```
-
-3.  **Frontend Setup:**
-    ```bash
-    cd frontend
-    npm install
-    ```
-
-### Running the Application
-
-1.  **Start the Backend:**
-    ```bash
-    cd backend
-    uvicorn main:app --reload
-    ```
-
-2.  **Start the Frontend:**
-    ```bash
-    cd frontend
-    npm start
-    ```
+Data shown is from public Yahoo feed.
+Models are educational; no investment advice – *use at your own risk*.
