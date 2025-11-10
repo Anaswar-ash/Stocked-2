@@ -1,26 +1,22 @@
 import asyncio
-import websockets
 import json
+from fastapi import WebSocket
 from services.data_service import get_historical_data
 
 class WebSocketManager:
-    _instance = None
+    def __init__(self):
+        self.clients: set[WebSocket] = set()
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(WebSocketManager, cls).__new__(cls)
-            cls._instance.clients = set()
-        return cls._instance
-
-    async def register(self, websocket):
+    async def register(self, websocket: WebSocket):
+        await websocket.accept()
         self.clients.add(websocket)
 
-    async def unregister(self, websocket):
+    async def unregister(self, websocket: WebSocket):
         self.clients.remove(websocket)
 
-    async def broadcast(self, message):
+    async def broadcast(self, message: str):
         if self.clients:
-            await asyncio.wait([client.send(message) for client in self.clients])
+            await asyncio.wait([client.send_text(message) for client in self.clients])
 
     async def producer(self):
         while True:
@@ -33,17 +29,14 @@ class WebSocketManager:
             except Exception as e:
                 print(f"Error in producer: {e}")
 
-    async def handler(self, websocket, path):
+    async def handler(self, websocket: WebSocket, path: str = None):
         await self.register(websocket)
         try:
-            await websocket.wait_closed()
+            while True:
+                await websocket.receive_text()
+        except Exception as e:
+            print(f"Error in handler: {e}")
         finally:
             await self.unregister(websocket)
-
-    async def run(self):
-        loop = asyncio.get_running_loop()
-        loop.create_task(self.producer())
-        async with websockets.serve(self.handler, "0.0.0.0", 8765):
-            await asyncio.Future()  # run forever
 
 manager = WebSocketManager()
