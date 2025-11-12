@@ -4,10 +4,19 @@ export const GlobalStyle = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
   body {
-    background-color: #000000;
-    color: '#ffffff';
+    background-color: #282c34; /* Carbon Black */
+    color: #ffffff; /* Snow White */
     font-family: 'Roboto Mono', monospace;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+  }
+
+  #root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
   }
 `;
