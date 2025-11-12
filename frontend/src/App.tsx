@@ -46,9 +46,24 @@ const App: React.FC = () => {
     switch (cmd) {
       case 'help':
         response = `Available commands:
-  predict <TICKER> <MODEL> <STEPS> (e.g., predict GBPUSD lstm 30)
-  data <TICKER> <PERIOD> (e.g., data AAPL 1y)
-  clear (clears the terminal output)`;
+  predict <TICKER> <MODEL> <STEPS>
+  data <TICKER> <PERIOD>
+  info
+  clear
+
+Available Models:
+  lstm, linear_regression, arima
+
+Example Currency Pairs:
+  GBPUSD, EURUSD, USDJPY, GBPINR
+
+Example Stocks:
+  AAPL, GOOGL, MSFT`;
+        break;
+      case 'info':
+        response = `Stocked-Terminal v1.0.0
+Created by Anaswar Ash
+This is a Bloomberg-style, minimalist, terminal-font web application for real-time currency and stock exchange data.`;
         break;
       case 'predict':
         if (parts.length < 4) {
@@ -66,8 +81,7 @@ const App: React.FC = () => {
 
         appendOutput(`Processing prediction for ${predictTicker} using ${modelName} for ${steps} steps...`);
         try {
-          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-          const res = await fetch(`${backendUrl}/predict/${predictTicker}`, {
+          const res = await fetch(`/api/predict/${predictTicker}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -94,8 +108,7 @@ const App: React.FC = () => {
 
         appendOutput(`Fetching data for ${dataTicker} for period ${period}...`);
         try {
-          const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-          const res = await fetch(`${backendUrl}/data/${dataTicker}?period=${period}`);
+          const res = await fetch(`/api/data/${dataTicker}?period=${period}`);
           const data = await res.json();
           if (res.ok) {
             response = `Historical data for ${dataTicker}:
@@ -123,7 +136,7 @@ ${JSON.stringify(data, null, 2)}`;
       <GlobalStyle />
       <TerminalContainer>
         <OutputContainer>
-          <p>Stocked-Terminal v1.0.0</p> {/* Changed name here */}
+          <p>Stocked-Terminal v1.0.0</p>
           <p>&gt; Welcome to Stocked-Terminal. Loading data...</p>
           <p>&gt; Type 'help' for commands.</p>
           {history.map((entry, index) => (
