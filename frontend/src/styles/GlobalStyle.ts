@@ -5,7 +5,7 @@ export const GlobalStyle = createGlobalStyle`
 
   body {
     background-color: #000000;
-    color: #00ff00;
+    color: '#ffffff';
     font-family: 'Roboto Mono', monospace;
     margin: 0;
     padding: 0;
