@@ -17,6 +17,8 @@ def get_historical_data(ticker: str, period: str = "5y"):
     """
     try:
         stock = yf.Ticker(ticker)
+        print(f"Fetching data for {ticker}...")
+        print("Stock Info:", stock.info)  # Add this line for debugging
         hist = stock.history(period=period)
         if hist.empty:
             raise HTTPException(status_code=404, detail=f"Ticker '{ticker}' not found or no data available.")
