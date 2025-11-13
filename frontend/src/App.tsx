@@ -92,7 +92,7 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
           if (res.ok) {
             response = `Prediction for ${predictTicker}: ${JSON.stringify(data.prediction, null, 2)}`;
           } else {
-            response = `Error predicting for ${predictTicker}: ${data.detail || res.statusText}`;
+            response = `Error predicting for ${predictTicker}: ${JSON.stringify(data.detail) || res.statusText}`;
           }
         } catch (error) {
           response = `Network error: ${error instanceof Error ? error.message : String(error)}`;
@@ -111,10 +111,9 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
           const res = await fetch(`/api/data/${dataTicker}?period=${period}`);
           const data = await res.json();
           if (res.ok) {
-            response = `Historical data for ${dataTicker}:
-${JSON.stringify(data, null, 2)}`;
+            response = `Historical data for ${dataTicker}:\n${JSON.stringify(data, null, 2)}`;
           } else {
-            response = `Error fetching data for ${dataTicker}: ${data.detail || res.statusText}`;
+            response = `Error fetching data for ${dataTicker}: ${JSON.stringify(data.detail) || res.statusText}`;
           }
         } catch (error) {
           response = `Network error: ${error instanceof Error ? error.message : String(error)}`;
