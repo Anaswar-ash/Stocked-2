@@ -111,7 +111,11 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
           response = 'Usage: data <TICKER> [PERIOD]';
         } else {
           const dataTicker = parts[1].toUpperCase();
-          const period = parts.length > 2 ? parts[2].toLowerCase() : '1y'; // Default period to 1y
+          let period = parts.length > 2 ? parts[2].toLowerCase() : '1y'; // Default period to 1y
+          // Append 'd' if period is a number
+          if (!isNaN(parseInt(period))) {
+            period = `${period}d`;
+          }
           setLines([...newLines, { type: 'response', text: `Fetching data for ${dataTicker} for period ${period}...` }]);
           try {
             const res = await fetch(`/api/data/${dataTicker}?period=${period}`);
@@ -149,7 +153,7 @@ ${JSON.stringify(data, null, 2)}`
         <CommandLine onCommand={handleCommand} />
       </TerminalContainer>
     </>
-  )
+  );
 }
 
 export default App;
