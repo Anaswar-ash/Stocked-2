@@ -48,8 +48,8 @@ const App: React.FC = () => {
   const handleCommand = async (command: string) => {
     const newLines: Line[] = [...lines, { type: 'command', text: `> ${command}` }];
 
-    const parts = command.toLowerCase().split(' ');
-    const cmd = parts[0];
+    const parts = command.trim().split(' ');
+    const cmd = parts[0].toLowerCase();
     let response = '';
 
     switch (cmd) {
@@ -83,7 +83,7 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
           response = 'Usage: predict <TICKER> <MODEL> <STEPS>';
         } else {
           const predictTicker = parts[1].toUpperCase();
-          const modelName = parts[2];
+          const modelName = parts[2].toLowerCase();
           const steps = parseInt(parts[3]);
 
           if (isNaN(steps)) {
@@ -91,10 +91,9 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
           } else {
             setLines([...newLines, { type: 'response', text: `Processing prediction for ${predictTicker} using ${modelName} for ${steps} steps...` }]);
             try {
-              const res = await fetch(`/api/predict/${predictTicker}`, {
+              const res = await fetch(`/api/predict/${predictTicker}?model_name=${modelName}&steps=${steps}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model_name: modelName, steps: steps }),
               });
               const data = await res.json();
               response = res.ok
@@ -108,11 +107,11 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
         setLines(prevLines => [...prevLines, { type: 'response', text: response }]);
         break;
       case 'data':
-        if (parts.length < 3) {
-          response = 'Usage: data <TICKER> <PERIOD>';
+        if (parts.length < 2) {
+          response = 'Usage: data <TICKER> [PERIOD]';
         } else {
           const dataTicker = parts[1].toUpperCase();
-          const period = parts[2];
+          const period = parts.length > 2 ? parts[2].toLowerCase() : '1y'; // Default period to 1y
           setLines([...newLines, { type: 'response', text: `Fetching data for ${dataTicker} for period ${period}...` }]);
           try {
             const res = await fetch(`/api/data/${dataTicker}?period=${period}`);
@@ -150,7 +149,7 @@ ${JSON.stringify(data, null, 2)}`
         <CommandLine onCommand={handleCommand} />
       </TerminalContainer>
     </>
-  );
+  )
 }
 
 export default App;
