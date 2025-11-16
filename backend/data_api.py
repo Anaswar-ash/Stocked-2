@@ -9,7 +9,7 @@ def get_data(ticker: str, period: str = "5y"):
     Fetches historical data for a given ticker.
     """
     try:
-        return get_historical_data(ticker, period)
+        return get_historical_data(ticker, period, to_json=True)
     except HTTPException as e:
         raise e
     except Exception as e:
