@@ -29,7 +29,7 @@ const OutputContainer = styled.div`
 `;
 
 interface Line {
-  text: string;
+  text?: string;
   type: 'command' | 'response' | 'chart';
   data?: number[];
 }
