@@ -17,11 +17,10 @@ def get_historical_data(ticker: str, period: str = "5y"):
     """
     try:
         stock = yf.Ticker(ticker)
-        print(f"Fetching data for {ticker}...")
-        print("Stock Info:", stock.info)  # Add this line for debugging
         hist = stock.history(period=period)
         if hist.empty:
             raise HTTPException(status_code=404, detail=f"Ticker '{ticker}' not found or no data available.")
-        return hist
+        # Convert DataFrame to JSON string
+        return hist.to_json(orient='split')
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching data for ticker '{ticker}': {e}")
