@@ -46,7 +46,7 @@ def train_and_predict_with_lstm(data, steps=30):
     for _ in range(steps):
         predicted_price = model.predict(current_input)
         forecast.append(predicted_price[0, 0])
-        current_input = np.append(current_input[:, 1:, :], [[predicted_price]], axis=1)
+        current_input = np.append(current_input[:, 1:, :], predicted_price.reshape(1, 1, 1), axis=1)
 
     forecast = scaler.inverse_transform(np.array(forecast).reshape(-1, 1))
     return forecast.flatten()

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { GlobalStyle } from './styles/GlobalStyle';
 import CommandLine from './components/CommandLine';
+import AsciiChart from './components/AsciiChart';
 
 const TerminalContainer = styled.div`
   background-color: #000000;
@@ -29,7 +30,8 @@ const OutputContainer = styled.div`
 
 interface Line {
   text: string;
-  type: 'command' | 'response';
+  type: 'command' | 'response' | 'chart';
+  data?: number[];
 }
 
 const App: React.FC = () => {
@@ -96,9 +98,18 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
                 headers: { 'Content-Type': 'application/json' },
               });
               const data = await res.json();
-              response = res.ok
-                ? `Prediction for ${predictTicker}: ${JSON.stringify(data.prediction, null, 2)}`
-                : `Error predicting for ${predictTicker}: ${JSON.stringify(data.detail) || res.statusText}`;
+              if (res.ok) {
+                const prediction = data.prediction;
+                let table = `Prediction for ${predictTicker} (next ${steps} days):\n`;
+                prediction.forEach((price: number, index: number) => {
+                  table += `Day ${index + 1}: ${price.toFixed(2)}\n`;
+                });
+                response = table;
+                setLines(prevLines => [...prevLines, { type: 'response', text: response }, { type: 'chart', data: prediction }]);
+                return;
+              } else {
+                response = `Error predicting for ${predictTicker}: ${JSON.stringify(data.detail) || res.statusText}`;
+              }
             } catch (error) {
               response = `Network error: ${error instanceof Error ? error.message : String(error)}`;
             }
@@ -120,10 +131,21 @@ This is a Bloomberg-style, minimalist, terminal-font web application for real-ti
           try {
             const res = await fetch(`/api/data/${dataTicker}?period=${period}`);
             const data = await res.json();
-            response = res.ok
-              ? `Historical data for ${dataTicker}:
-${JSON.stringify(data, null, 2)}`
-              : `Error fetching data for ${dataTicker}: ${JSON.stringify(data.detail) || res.statusText}`;
+            if (res.ok) {
+              const parsedData = JSON.parse(data);
+              let table = `Historical data for ${dataTicker}:\n`;
+              table += "Date\t\tOpen\tHigh\tLow\tClose\tVolume\n";
+              parsedData.index.forEach((timestamp: number, i: number) => {
+                const date = new Date(timestamp).toISOString().split('T')[0];
+                table += `${date}\t${parsedData.data[i][0].toFixed(2)}\t${parsedData.data[i][1].toFixed(2)}\t${parsedData.data[i][2].toFixed(2)}\t${parsedData.data[i][3].toFixed(2)}\t${parsedData.data[i][4]}\n`;
+              });
+              response = table;
+              const closePrices = parsedData.data.map((row: number[]) => row[3]);
+              setLines(prevLines => [...prevLines, { type: 'response', text: response }, { type: 'chart', data: closePrices }]);
+              return;
+            } else {
+              response = `Error fetching data for ${dataTicker}: ${JSON.stringify(data.detail) || res.statusText}`;
+            }
           } catch (error) {
             response = `Network error: ${error instanceof Error ? error.message : String(error)}`;
           }
@@ -145,9 +167,12 @@ ${JSON.stringify(data, null, 2)}`
       <GlobalStyle />
       <TerminalContainer>
         <OutputContainer>
-          {lines.map((line, index) => (
-            <p key={index}>{line.text}</p>
-          ))}
+          {lines.map((line, index) => {
+            if (line.type === 'chart' && line.data) {
+              return <AsciiChart key={index} data={line.data} width={80} height={15} />;
+            }
+            return <p key={index}>{line.text}</p>;
+          })}
           <div ref={outputEndRef} />
         </OutputContainer>
         <CommandLine onCommand={handleCommand} />
